@@ -32,14 +32,10 @@ class Entity:
     def positionX(self):
         return self.__positionX
 
-    @positionX.setter
-    def positionX(self, positionX):
-        self.__positionX = positionX
-
     @property
     def positionY(self):
         return self.__positionY
 
-    @positionY.setter
-    def positionY(self, positionY):
-        self.__positionY = positionY
+    def setPosition(self, x, y):
+        self.__positionX = x
+        self.__positionY = y

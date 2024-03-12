@@ -1,4 +1,5 @@
 import random
+
 from pynput.keyboard import Key, Listener
 from Entity import Entity
 
@@ -9,79 +10,95 @@ class Game:
         # create game board
         self.__width = width
         self.__height = height
-
+    
         self.__empty = " "
         self.__board = [[self.__empty for _ in range(width)] for _ in range(height)]
 
         # initialize entities
         self.__player = Entity("P", 100, 100)
-
-        zombie = Entity("Z", 50, 10)
-        skeleton = Entity("S", 60, 13)
-        creeper = Entity("C", 70, 20)
-        self.__entities = [zombie, skeleton, creeper]
+        self.__entities = []
 
         # update board
-        self.__player.positionX = 0
-        self.__player.positionY = 0
+        self.__player.setPosition(0, 0)
         self.__board[self.__player.positionY][self.__player.positionX] = self.__player.name
 
         self.generate_random_entities()
         self.print_board()
 
+    # the rendering function has been completed but may be too slow
     def render(self, vector):
         match vector:
             case "x":
                 for i in range(len(self.__board)):
-                    self.__board[i].extend(self.__empty for _ in range(3))
-                self.__width += 3
+                    self.__board[i].extend(self.__empty for _ in range(2))
+                self.__width += 2
             case "y":
                 self.__board.extend([[self.__empty for _ in range(self.__width)] for _ in range(3)])
-                self.__height += 3
+                self.__height += 2
+        self.generate_random_entities()
 
-    def generate_random_entities(self, rangeY = [1,4], rangeX = [0,4]):
-        for e in self.__entities:
-            eY = random.randint(*rangeY)
-            eX = random.randint(*rangeX)
-
-            e.positionX = eX
-            e.positionY = eY
-            self.__board[eY][eX] = e.name
+    def generate_random_entities(self):
+        things = ["z","s","c"]
+        chance = [ 50, 30, 20]
+        results = random.choices(things, chance, k = 5)
+        for e in results:
+            eY = random.randint(self.__height - 3, self.__height - 1)
+            eX = random.randint(self.__width - 3, self.__width - 1)
+            match e:
+                case "z": 
+                    zombie = Entity("Z", 50, 10)
+                    zombie.setPosition(eX, eY)
+                    self.__board[eY][eX] = zombie.name
+                    self.__entities.append(zombie)
+                case "s": 
+                    skeleton = Entity("S",60,20)
+                    skeleton.setPosition(eX, eY)
+                    self.__board[eY][eX] = skeleton.name
+                    self.__entities.append(skeleton)
+                case "c": 
+                    creeper = Entity("C",70,30)
+                    creeper.setPosition(eX, eY)
+                    self.__board[eY][eX] = creeper.name
+                    self.__entities.append(creeper)
 
     def validate(self):
         for e in self.__entities:
             if self.__player.positionX == e.positionX and self.__player.positionY == e.positionY:
                 self.__player.health = self.__player.health - e.power
-                e.power = e.health - self.__player.power
                 self.__entities.remove(e)
 
     def print_board(self):
         os.system('cls' if os.name == 'nt' else 'clear')
+        print(f"""
+--- YOU ---
+health: {self.__player.health}
+power: {self.__player.power}
+-----------
+""")
         for i in range(len(self.__board)):
             print(f"{self.__board[i]}", end="\n")
         print("\n\n")
         if self.__player.health <= 0:
             print("[Log] You lose!")
             exit(0)
-        elif len(self.__entities) == 0:
+        if len(self.__entities) == 0:
             print("[Log] You win!")
             exit(0)
 
 
     def __move_player(self, x, y):
         if y < 0 or x < 0: return
-
-        if x > self.__width - 2: 
+        
+        if x > self.__width - 1: 
             self.render('x')
 
-        if y > self.__height - 2:
+        if y > self.__height - 1:
             self.render('y')
         # remove player from previous position
         self.__board[self.__player.positionY][self.__player.positionX] = self.__empty
 
         # add player to new position
-        self.__player.positionX = x
-        self.__player.positionY = y
+        self.__player.setPosition(x,y)
         self.__board[y][x] = self.__player.name
 
         self.update_board()
