@@ -8,113 +8,108 @@ import os
 class Game:
     def __init__(self, width, height):
         # create game board
-        self.__width = width
-        self.__height = height
+        self.width = width
+        self.height = height
     
-        self.__empty = " "
-        self.__board = [[self.__empty for _ in range(width)] for _ in range(height)]
+        self.empty = " "
+        self.board = [[self.empty for _ in range(width)] for _ in range(height)]
 
         # initialize entities
-        self.__player = Entity("P", 100, 100)
-        self.__entities = []
+        self.player = Entity("P", 100, 100)
+        self.entities = []
+        self.position_exemptions = []
 
         # update board
-        self.__player.setPosition(0, 0)
-        self.__board[self.__player.positionY][self.__player.positionX] = self.__player.name
+        self.player.setPosition(0, 0)
+        self.setEntityPosition(self.player.x, self.player.y, self.player.name)
 
-        self.generate_random_entities()
-        self.print_board()
+        self.generateRandomEntities()
+        self.printBoard()
 
     # the rendering function has been completed but may be too slow
     def render(self, vector):
         match vector:
             case "x":
-                for i in range(len(self.__board)):
-                    self.__board[i].extend(self.__empty for _ in range(2))
-                self.__width += 2
+                for i in range(len(self.board)):
+                    self.board[i].extend(self.empty for _ in range(2))
+                self.width += 2
             case "y":
-                self.__board.extend([[self.__empty for _ in range(self.__width)] for _ in range(3)])
-                self.__height += 2
-        self.generate_random_entities()
+                self.board.extend([[self.empty for _ in range(self.width)] for _ in range(3)])
+                self.height += 2
+        self.generateRandomEntities()
 
-    def generate_random_entities(self):
+    def generateRandomEntities(self):
         things = ["z","s","c"]
         chance = [ 50, 30, 20]
         results = random.choices(things, chance, k = 5)
+        entity: Entity = None
+
         for e in results:
-            eY = random.randint(self.__height - 3, self.__height - 1)
-            eX = random.randint(self.__width - 3, self.__width - 1)
+            eY = random.choice([i for i in range(self.height - 1) if i not in self.position_exemptions[i]])
+            eX = random.choice([i for i in range(self.width - 1) if i not in self.position_exemptions[i]])
             match e:
-                case "z": 
-                    zombie = Entity("Z", 50, 10)
-                    zombie.setPosition(eX, eY)
-                    self.__board[eY][eX] = zombie.name
-                    self.__entities.append(zombie)
-                case "s": 
-                    skeleton = Entity("S",60,20)
-                    skeleton.setPosition(eX, eY)
-                    self.__board[eY][eX] = skeleton.name
-                    self.__entities.append(skeleton)
-                case "c": 
-                    creeper = Entity("C",70,30)
-                    creeper.setPosition(eX, eY)
-                    self.__board[eY][eX] = creeper.name
-                    self.__entities.append(creeper)
+                case "z": entity = Entity("Z", 50, 10)
+                case "s": entity = Entity("S",60,20)
+                case "c": entity = Entity("C",70,30)
+            entity.setPosition(eX, eY)
+            self.setEntityPosition(eX, eY, entity.name)
+            self.entities.append(entity)
+            self.position_exemptions.append([eX, eY])
 
     def validate(self):
-        for e in self.__entities:
-            if self.__player.positionX == e.positionX and self.__player.positionY == e.positionY:
-                self.__player.health = self.__player.health - e.power
-                self.__entities.remove(e)
+        for e in self.entities:
+            if self.player.x == e.x and self.player.y == e.y:
+                self.player.health = self.player.health - e.power
+                self.entities.remove(e)
 
-    def print_board(self):
+
+    def printBoard(self):
         os.system('cls' if os.name == 'nt' else 'clear')
         print(f"""
 --- YOU ---
-health: {self.__player.health}
-power: {self.__player.power}
+health: {self.player.health}
+power: {self.player.power}
 -----------
 """)
-        for i in range(len(self.__board)):
-            print(f"{self.__board[i]}", end="\n")
+        for i in range(len(self.board)):
+            print(f"{self.board[i]}", end="\n")
         print("\n\n")
-        if self.__player.health <= 0:
+        if self.player.health <= 0:
             print("[Log] You lose!")
             exit(0)
-        if len(self.__entities) == 0:
+        if len(self.entities) == 0:
             print("[Log] You win!")
             exit(0)
 
 
-    def __move_player(self, x, y):
+    def movePlayer(self, x, y):
         if y < 0 or x < 0: return
         
-        if x > self.__width - 1: 
+        if x > self.width - 1: 
             self.render('x')
 
-        if y > self.__height - 1:
+        if y > self.height - 1:
             self.render('y')
         # remove player from previous position
-        self.__board[self.__player.positionY][self.__player.positionX] = self.__empty
+        self.setEntityPosition(x, y, self.empty)
 
         # add player to new position
-        self.__player.setPosition(x,y)
-        self.__board[y][x] = self.__player.name
+        self.player.setPosition(x,y)
+        self.setEntityPosition(x, y, self.player.name)
 
-        self.update_board()
+        self.validate()
+        self.printBoard()
 
     def handle_move(self, way):
         match way:
-            case Key.up: self.__move_player(self.__player.positionX, self.__player.positionY -  1)
-            case Key.left: self.__move_player(self.__player.positionX - 1, self.__player.positionY)
-            case Key.down: self.__move_player(self.__player.positionX, self.__player.positionY + 1)
-            case Key.right: self.__move_player(self.__player.positionX + 1, self.__player.positionY)
+            case Key.up: self.movePlayer(self.player.x, self.player.y -  1)
+            case Key.left: self.movePlayer(self.player.x - 1, self.player.y)
+            case Key.down: self.movePlayer(self.player.x, self.player.y + 1)
+            case Key.right: self.movePlayer(self.player.x + 1, self.player.y)
 
-    def update_board(self):
-        self.validate()
-        self.print_board()
+    def setEntityPosition(self, x, y, e):
+        self.board[y][x] = e
 
 game = Game(5,7)
-
 with Listener(on_press = game.handle_move) as listener:
     listener.join()

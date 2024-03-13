@@ -29,13 +29,13 @@ class Entity:
         self.__power = power
 
     @property
-    def positionX(self):
-        return self.__positionX
+    def x(self):
+        return self.__x
 
     @property
-    def positionY(self):
-        return self.__positionY
+    def y(self):
+        return self.__y
 
     def setPosition(self, x, y):
-        self.__positionX = x
-        self.__positionY = y
+        self.__x = x
+        self.__y = y
