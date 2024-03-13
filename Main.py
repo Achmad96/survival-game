@@ -16,12 +16,12 @@ class Game:
 
         # initialize entities
         self.player = Entity("P", 100, 100)
-        self.entities = []
-        self.position_exemptions = []
-
-        # update board
         self.player.setPosition(0, 0)
-        self.setEntityPosition(self.player.x, self.player.y, self.player.name)
+
+        self.entities = []
+        self.setEntityPosition(self.player.x, self.player.y, self.player)
+
+        self.position_exemptions = [[self.player.x, self.player.y]]
 
         self.generateRandomEntities()
         self.printBoard()
@@ -45,14 +45,17 @@ class Game:
         entity: Entity = None
 
         for e in results:
-            eY = random.choice([i for i in range(self.height - 1) if i not in self.position_exemptions[i]])
-            eX = random.choice([i for i in range(self.width - 1) if i not in self.position_exemptions[i]])
+            eY = random.choice(list(range(0, self.height - 1)))
+            eX = random.choice(list(range(0, self.width - 1)))
+            while ([eX, eY] in self.position_exemptions):
+                eY = random.choice(list(range(0, self.height - 1)))
+                eX = random.choice(list(range(0, self.width - 1)))
             match e:
                 case "z": entity = Entity("Z", 50, 10)
                 case "s": entity = Entity("S",60,20)
                 case "c": entity = Entity("C",70,30)
             entity.setPosition(eX, eY)
-            self.setEntityPosition(eX, eY, entity.name)
+            self.setEntityPosition(eX, eY, entity)
             self.entities.append(entity)
             self.position_exemptions.append([eX, eY])
 
@@ -94,8 +97,7 @@ power: {self.player.power}
         self.setEntityPosition(x, y, self.empty)
 
         # add player to new position
-        self.player.setPosition(x,y)
-        self.setEntityPosition(x, y, self.player.name)
+        self.setEntityPosition(x, y, self.player)
 
         self.validate()
         self.printBoard()
@@ -107,8 +109,12 @@ power: {self.player.power}
             case Key.down: self.movePlayer(self.player.x, self.player.y + 1)
             case Key.right: self.movePlayer(self.player.x + 1, self.player.y)
 
-    def setEntityPosition(self, x, y, e):
-        self.board[y][x] = e
+    def setEntityPosition(self, x, y, e: Entity | str):
+        if type(e) == Entity:
+            self.board[e.y][e.x] = self.empty
+            e.setPosition(x,y)
+            self.board[y][x] = e.name
+        else: self.board[y][x] = e
 
 game = Game(5,7)
 with Listener(on_press = game.handle_move) as listener:
