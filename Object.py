@@ -17,6 +17,10 @@ class Place:
     @property
     def y(self):
         return self.__y
+    
+    def setPosition(self, x: int, y: int):
+        self.__x = x
+        self.__y = y
 
 class HealPlace(Place):
     def heal(self, player: Entity):
