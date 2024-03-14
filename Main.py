@@ -41,7 +41,7 @@ class Game:
 
     def generateRandomObjects(self):
         things = ["z","s","c", "h"]
-        chance = [ 0.4, 0.3, 0.2, 0.1]
+        chance = [ 0.3, 0.3, 0.2, 0.2]
         results = random.choices(things, chance, k = 5)
         object: Entity | HealPlace = None
 
@@ -63,24 +63,25 @@ class Game:
 
     def validate(self):
         for e in list(self.objects):
-            if type(e) == Place:
-                if e.name == "H": 
+            if self.player.x == e.x and self.player.y == e.y: 
+                if type(e) == HealPlace:
                     e.heal(self.player)
                     self.objects.remove(e)
-            if type(e) == Entity:
-                if self.player.x == e.x and self.player.y == e.y: 
+                elif type(e) == Entity:
                     self.player.health = self.player.health - e.power
                     self.objects.remove(e)
 
 
     def printBoard(self):
         os.system('cls' if os.name == 'nt' else 'clear')
+        enemiesCount = len(list(filter(lambda x: type(x) == Entity, self.objects)))
         print(f"""
 --- YOU ---
 health: {self.player.health}
 power: {self.player.power}
 -----------
-{len(list(filter(lambda x: type(x) == Entity, self.objects)))}
+
+Enemies: {enemiesCount}
 """)
         
         for i in range(len(self.board)):
@@ -89,7 +90,7 @@ power: {self.player.power}
         if self.player.health <= 0:
             print("[Log] You lose!")
             exit(0)
-        elif len(list(filter(lambda x: type(x) == Entity, self.objects))) == 0:
+        elif enemiesCount == 0:
             print("[Log] You win!")
             exit(0)
 

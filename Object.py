@@ -24,5 +24,5 @@ class Place:
 
 class HealPlace(Place):
     def heal(self, player: Entity):
-        health_number = random.choices([10, 20, 30],[0.7, 0.2, 0.1])
-        player.health += health_number
+        health_number = random.choices([10, 20, 30],[0.7, 0.2, 0.1])[0]
+        player.health = player.health + health_number
