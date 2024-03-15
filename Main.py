@@ -75,7 +75,6 @@ class Game:
                     self.player.health -= object_at_player_position.power
 
                 # Remove object from the board and set
-                self.setObjectPosition(self.player.x, self.player.y, self.empty)
                 self.objects.remove(object_at_player_position)
                 self.object_positions.remove((self.player.x, self.player.y))
 
@@ -134,6 +133,6 @@ Enemies: {enemiesCount}
             self.board[y][x] = e.name
         else: self.board[y][x] = e
 
-game = Game(5,7)
+game = Game(10,10)
 with Listener(on_press = game.handle_move) as listener:
     listener.join()
