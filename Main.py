@@ -20,6 +20,7 @@ class Game:
         self.player.setPosition(0, 0)
 
         self.objects = []
+        self.object_positions = set()
         self.setObjectPosition(self.player.x, self.player.y, self.player)
 
         self.position_exemptions = [[self.player.x, self.player.y]]
@@ -61,15 +62,22 @@ class Game:
             self.objects.append(object)
             self.position_exemptions.append([eX, eY])
 
+            # Add object position to the set
+            self.object_positions.add((eX, eY))
+
     def validate(self):
-        for e in list(self.objects):
-            if self.player.x == e.x and self.player.y == e.y: 
-                if type(e) == HealPlace:
-                    e.heal(self.player)
-                    self.objects.remove(e)
-                elif type(e) == Entity:
-                    self.player.health = self.player.health - e.power
-                    self.objects.remove(e)
+        if (self.player.x, self.player.y) in self.object_positions:
+            object_at_player_position = next((obj for obj in self.objects if obj.x == self.player.x and obj.y == self.player.y), None)
+            if object_at_player_position:
+                if isinstance(object_at_player_position, HealPlace):
+                    object_at_player_position.heal(self.player)
+                elif isinstance(object_at_player_position, Entity):
+                    self.player.health -= object_at_player_position.power
+
+                # Remove object from the board and set
+                self.setObjectPosition(self.player.x, self.player.y, self.empty)
+                self.objects.remove(object_at_player_position)
+                self.object_positions.remove((self.player.x, self.player.y))
 
 
     def printBoard(self):
