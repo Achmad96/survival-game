@@ -1,8 +1,8 @@
 import random
 
 from pynput.keyboard import Key, Listener
-from Entity import Entity
-from Object import Place,HealPlace
+from objects.Entity import Entity
+from objects.Place import HealPlace
 
 import os
 

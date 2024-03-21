@@ -1,4 +1,4 @@
-from Entity import Entity
+from objects.Entity import Entity
 import random
 class Place:
     def __init__(self, name, x, y):
