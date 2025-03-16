@@ -1,6 +1,6 @@
 # Survival Game
 
-Survival-Game is a simple game with 2D layout. Players must kill other entities and health must be greater than 0 to win the game, otherwise the game will be lost.
+Survival-Game is a simple game with a 2D layout. Players must kill other entities and health must be greater than 0 to win the game, otherwise, you will lose the game.
 
 ## Entities and the attributes
 
